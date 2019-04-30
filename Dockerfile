@@ -1,9 +1,7 @@
 # Dockerfile References: https://docs.docker.com/engine/reference/builder/
 
 # Start from golang v1.12 base image
-FROM golang:1.12-alpine
-
-RUN go version
+FROM golang:1.12-alpine AS builder
 
 # Add Maintainer Info
 LABEL maintainer="Towel Software <hello@towel.dk>"
@@ -24,7 +22,16 @@ RUN go get -d -v ./...
 # Install the package
 RUN go install -v ./...
 
-RUN apk del git
+COPY ./Mastersteam /usr/src/Mastersteam
+
+FROM alpine:3.5
+
+WORKDIR /usr/local/bin
+
+COPY --from=builder /usr/src/Mastersteam .
+
+# We'll likely need to add SSL root certificates
+RUN apk --no-cache add ca-certificates
 
 # This container exposes port 8080 to the outside world
 EXPOSE 8080
