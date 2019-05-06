@@ -2,8 +2,6 @@
 
 # Start from golang v1.12 base image
 FROM golang:1.12-alpine AS builder
-
-# Add Maintainer Info
 LABEL maintainer="Towel Software <hello@towel.dk>"
 
 # Install git
@@ -22,13 +20,14 @@ RUN go get -d -v ./...
 # Install the package
 RUN go install -v ./...
 
-COPY ./Mastersteam /usr/src/Mastersteam
+RUN cp $GOPATH/bin/Mastersteam /usr/local/bin/Mastersteam
 
 FROM alpine:3.5
+LABEL maintainer="Towel Software <hello@towel.dk>"
 
 WORKDIR /usr/local/bin
 
-COPY --from=builder /usr/src/Mastersteam .
+COPY --from=builder /usr/local/bin/Mastersteam .
 
 # We'll likely need to add SSL root certificates
 RUN apk --no-cache add ca-certificates
